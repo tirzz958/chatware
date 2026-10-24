@@ -9,9 +9,10 @@ service cloud.firestore {
     function isGlobalGroup(chatId) { return chatId == 'global_apaaja'; }
 
     match /users/{uid} {
+      // WAJIB: biar tab Kontak bisa list semua user
+      allow read: if signedIn(); 
       allow create: if signedIn() && request.auth.uid == uid
         && request.resource.data.uid == uid;
-      allow read: if signedIn();
       allow update: if signedIn() && request.auth.uid == uid
         && request.resource.data.uid == resource.data.uid;
       allow delete: if signedIn() && request.auth.uid == uid;
@@ -20,6 +21,7 @@ service cloud.firestore {
     match /chats/{chatId} {
       allow read: if signedIn() && request.auth.uid in resource.data.members;
 
+      // Create: wajib >= 2 member, KECUALI grup global yang boleh 1 member awal
       allow create: if signedIn()
         && request.auth.uid == request.resource.data.createdBy
         && request.auth.uid in request.resource.data.members
@@ -30,6 +32,7 @@ service cloud.firestore {
           || (isGlobalGroup(chatId) && request.resource.data.members.size() == 1)
         );
 
+      // Update: member biasa ga boleh ubah members. Grup global boleh self-join.
       allow update: if signedIn() && (
         (
           request.auth.uid in resource.data.members
