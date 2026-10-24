@@ -291,18 +291,21 @@ function listenData(){
   if(stopChats)stopChats();
   if(stopContacts)stopContacts();
 
-  // FIX: Pakai array-contains agar Firestore tidak protes soal rules read chats
+  // Listener Chats & Groups
   stopChats = onSnapshot(
     query(collection(db,"chats"), where("members","array-contains",me.uid)),
     snap=>{ chatRows = snap.docs.map(d=>({id:d.id,...d.data()})); if(currentTab==="chats"||currentTab==="groups") renderList(); },
     err=>toast("Gagal load chat: "+err.message)
   );
 
-  // FIX: Realtime listener buat contacts
+  // Listener Contacts (Firestore users collection)
   stopContacts = onSnapshot(
     query(collection(db,"users")),
-    snap=>{ contactRows = snap.docs.map(d=>d.data()).filter(u=>u.uid!==me.uid); if(currentTab==="contacts") renderList(); },
-    err=>console.warn("Gagal load kontak:", err.message)
+    snap=>{ 
+      contactRows = snap.docs.map(d=>d.data()).filter(u=>u.uid!==me.uid); 
+      if(currentTab==="contacts") renderList(); 
+    },
+    err=>console.warn("Gagal load kontak (cek rules Firestore):", err.message)
   );
 }
 
