@@ -6,49 +6,42 @@
 <meta name="theme-color" content="#0b141a">
 <title>ChatWave</title>
 <style>
-:root{--bright:#00a884;--bg:#0b141a;--panel:#111b21;--panel2:#202c33;--line:#2a3942;--text:#e9edef;--muted:#8696a0;--bubble:#202c33;--mine:#005c4b;--ease:cubic-bezier(.22,1,.36,1);--nav-h:60px}
+:root{--bright:#00a884;--bg:#0b141a;--panel:#111b21;--panel2:#202c33;--line:#2a3942;--text:#e9edef;--muted:#8696a0;--bubble:#202c33;--mine:#005c4b;--ease:cubic-bezier(.22,1,.36,1);--nav-h:64px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;margin:0;overflow:hidden;background:var(--bg);color:var(--text);font:15px system-ui,-apple-system,"Segoe UI",sans-serif}
 button,input{font:inherit;color:inherit;border:0;background:none}
 input{width:100%;background:#0b141a;border:1px solid var(--line);border-radius:9px;padding:12px;transition:border-color .18s,box-shadow .18s}
 input:focus{outline:none;border-color:var(--bright);box-shadow:0 0 0 3px rgba(0,168,132,.15)}
 
-/* VIEW STATE */
 #auth-view{display:none;height:100dvh;place-items:center;padding:18px;background:radial-gradient(1200px 600px at 50% -10%,#0d3b33 0%,#0b141a 55%);overflow-y:auto}
 #auth-view.active{display:grid}
 #app-view{display:none;height:100dvh;flex-direction:column}
 #app-view.active{display:flex}
 
-/* AUTH FORM */
 .auth-box{width:min(100%,400px);background:rgba(17,27,33,.85);backdrop-filter:blur(18px);border:1px solid var(--line);padding:30px;border-radius:18px;margin:auto}
 .brand{font-size:22px;font-weight:800;display:flex;align-items:center;gap:10px;margin-bottom:8px}
 .logo{width:34px;height:34px;border-radius:50%;background:var(--bright);color:#052e27;display:grid;place-items:center;flex-shrink:0}
 .logo svg{width:18px;height:18px}
-.muted{color:var(--muted)}
-.tiny{font-size:12px}
+.muted{color:var(--muted)} .tiny{font-size:12px}
 .auth-form{display:grid;gap:11px;margin-top:20px}
 .auth-form label{font-size:13px;color:var(--muted);display:block}
 .auth-form input{margin-top:6px;color:var(--text)}
 .primary{background:var(--bright);color:#052e27;font-weight:750;padding:13px;border-radius:10px;transition:transform .12s}
-.primary:active{transform:scale(.98)}
-.primary:disabled{opacity:.6;cursor:not-allowed}
+.primary:active{transform:scale(.98)} .primary:disabled{opacity:.6;cursor:not-allowed}
 .tabrow{display:flex;gap:6px;margin-top:20px;background:#0b141a;padding:4px;border-radius:11px;border:1px solid var(--line)}
-.tab{flex:1;padding:9px;background:transparent;border-radius:8px;font-size:14px;color:var(--muted);transition:all .2s}
+.tab{flex:1;padding:9px;background:transparent;border-radius:8px;font-size:14px;color:var(--muted);transition:all .2s;cursor:pointer}
 .tab.active{background:var(--bright);color:#052e27;font-weight:650}
 .notice{min-height:18px;color:#ffd180;font-size:13px;margin:8px 0 0}
 
-/* MAIN LAYOUT */
 .main-layout{display:flex;flex:1;overflow:hidden;padding-bottom:var(--nav-h)}
 .sidebar{width:100%;max-width:360px;display:flex;flex-direction:column;border-right:1px solid var(--line);background:var(--panel);flex-shrink:0}
 .chat-area{flex:1;display:none;flex-direction:column;background:#0b141a}
 
-/* BOTTOM NAV */
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);background:rgba(17,27,33,.95);backdrop-filter:blur(10px);border-top:1px solid var(--line);display:flex;z-index:50}
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;transition:color .2s}
 .nav-item.active{color:var(--bright)}
 .nav-item svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2}
 
-/* HEADER & LIST */
 .top{display:flex;align-items:center;gap:10px;padding:14px;background:rgba(32,44,51,.75);min-height:60px}
 .top .brand{font-size:18px;margin:0}
 .actions{display:flex;gap:6px;margin-left:auto}
@@ -65,7 +58,6 @@ input:focus{outline:none;border-color:var(--bright);box-shadow:0 0 0 3px rgba(0,
 .last{font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
 .section-title{font-size:12px;text-transform:uppercase;color:var(--muted);padding:14px;font-weight:700;letter-spacing:.05em}
 
-/* CHAT VIEW */
 .chathead{display:flex;align-items:center;gap:10px;padding:11px 14px;background:rgba(32,44,51,.85);border-bottom:1px solid var(--line)}
 .chathead .meta{flex:1}
 .messages{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding:20px 14px;background-image:radial-gradient(rgba(255,255,255,.035) 1px,transparent 1px);background-size:18px 18px}
@@ -77,7 +69,6 @@ input:focus{outline:none;border-color:var(--bright);box-shadow:0 0 0 3px rgba(0,
 .time{text-align:right;font-size:10px;color:#c2d1d7;margin-top:4px;display:flex;gap:4px;justify-content:flex-end;align-items:center}
 .time svg{width:14px;height:14px;stroke:#53bdeb;fill:none;stroke-width:2.4}
 
-/* COMPOSER */
 .composer{display:flex;align-items:center;gap:6px;padding:10px 12px;background:rgba(32,44,51,.85)}
 .composer input[type=text]{margin:0;background:#2a3942;border:0;border-radius:24px;padding:11px 16px}
 .attach{width:42px;height:42px;border-radius:50%;background:#2a3942;display:grid;place-items:center;cursor:pointer;flex:none}
@@ -85,11 +76,9 @@ input:focus{outline:none;border-color:var(--bright);box-shadow:0 0 0 3px rgba(0,
 .send{width:44px;height:44px;flex:none;border-radius:50%;background:var(--bright);color:#052e27;display:grid;place-items:center;cursor:pointer}
 .send svg{width:20px;height:20px;fill:#052e27}
 
-/* TOAST */
 .toast{position:fixed;display:none;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:#233138;padding:12px 18px;border-radius:10px;max-width:90vw;z-index:100;opacity:0;transition:all .25s}
 .toast.show{display:block;opacity:1;transform:translateX(-50%) translateY(0)}
 
-/* RESPONSIVE */
 @media(max-width:720px){
   .sidebar{max-width:100%;border-right:0}
   .chat-area{position:absolute;inset:0;z-index:10;background:var(--bg)}
@@ -107,7 +96,6 @@ input:focus{outline:none;border-color:var(--bright);box-shadow:0 0 0 3px rgba(0,
 </head>
 <body>
 
-<!-- AUTH -->
 <div id="auth-view">
   <div class="auth-box">
     <div class="brand"><span class="logo"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-12.3 7.6L3 21l1.9-5.7A8.5 8.5 0 1 1 21 11.5z" fill="#052e27"/></svg></span> ChatWave</div>
@@ -126,10 +114,8 @@ input:focus{outline:none;border-color:var(--bright);box-shadow:0 0 0 3px rgba(0,
   </div>
 </div>
 
-<!-- APP DASHBOARD -->
 <div id="app-view">
   <div class="main-layout">
-    <!-- SIDEBAR -->
     <aside class="sidebar">
       <header class="top">
         <div class="brand"><span class="logo"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-12.3 7.6L3 21l1.9-5.7A8.5 8.5 0 1 1 21 11.5z" fill="#052e27"/></svg></span> ChatWave</div>
@@ -143,12 +129,11 @@ input:focus{outline:none;border-color:var(--bright);box-shadow:0 0 0 3px rgba(0,
         <div id="myAvatar" class="avatar">K</div>
         <div class="meta"><strong id="myName">Kamu</strong><span class="tiny muted" id="myEmail">-</span></div>
       </div>
-      <div style="padding:10px"><input id="search" placeholder="Cari chat…" autocomplete="off"></div>
+      <div style="padding:10px"><input id="search" placeholder="Cari…" autocomplete="off"></div>
       <div class="section-title" id="listTitle">Chat Pribadi</div>
       <div id="list" class="list"></div>
     </aside>
 
-    <!-- CHAT AREA -->
     <section id="chatArea" class="chat-area hidden-desk">
       <div id="empty" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted)">
         <div class="logo" style="width:60px;height:60px;margin-bottom:14px"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-12.3 7.6L3 21l1.9-5.7A8.5 8.5 0 1 1 21 11.5z" fill="#052e27"/></svg></div>
@@ -173,13 +158,15 @@ input:focus{outline:none;border-color:var(--bright);box-shadow:0 0 0 3px rgba(0,
     </section>
   </div>
 
-  <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
     <button class="nav-item active" data-tab="chats">
       <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Chats
     </button>
     <button class="nav-item" data-tab="groups">
       <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Group
+    </button>
+    <button class="nav-item" data-tab="contacts">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Kontak
     </button>
     <button class="nav-item" data-tab="account">
       <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Akun
@@ -285,7 +272,8 @@ document.querySelectorAll('.nav-item').forEach(btn=>{ btn.onclick = () => switch
 function switchTab(tab){
   currentTab=tab;
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
-  $("listTitle").textContent = tab==="chats"?"Chat Pribadi":tab==="groups"?"Group":"Akun Saya";
+  const titles = {chats:"Chat Pribadi", groups:"Group", contacts:"Kontak User", account:"Akun Saya"};
+  $("listTitle").textContent = titles[tab];
   $("chatArea").classList.remove("open");
   renderChats();
 }
@@ -301,8 +289,9 @@ $("composer").addEventListener("submit",sendMessage);
 
 function listenChats(){
   if(stopChats)stopChats();
-  stopChats=onSnapshot(query(collection(db,"chats"),where("members","array-contains",me.uid),orderBy("updatedAt","desc")),snap=>{
-    chatRows=snap.docs.map(d=>({id:d.id,...d.data()}));renderChats();
+  stopChats=onSnapshot(collection(db,"chats"),snap=>{
+    chatRows = snap.docs.map(d=>({id:d.id,...d.data()})).filter(c => (c.members||[]).includes(me.uid));
+    renderChats();
   },err=>toast("Chat: "+err.message));
 }
 
@@ -312,15 +301,39 @@ function chatName(c){
   return other?.displayName||other?.email||"Chat pribadi";
 }
 
-function renderChats(){
+async function renderChats(){
   const list=$("list");list.replaceChildren();
   const filter=$("search").value.toLowerCase();
-  let rows = chatRows.filter(c => currentTab === "groups" ? c.type === "group" : c.type !== "group");
-  rows = rows.filter(c=>chatName(c).toLowerCase().includes(filter));
+  
   if(currentTab === "account"){
     list.innerHTML = `<div style="padding:20px"><p><strong>Email:</strong><br>${me.email}</p><p><strong>Nama:</strong><br>${me.displayName||'-'}</p><p><strong>UID:</strong><br><span class="tiny muted">${me.uid}</span></p></div>`;
     return;
   }
+
+  if(currentTab === "contacts"){
+    list.innerHTML = '<div class="muted tiny" style="padding:16px">Memuat kontak…</div>';
+    try {
+      const snap = await getDocs(collection(db, "users"));
+      let users = snap.docs.map(d=>d.data()).filter(u=>u.uid !== me.uid);
+      users = users.filter(u => (u.displayName||'').toLowerCase().includes(filter) || (u.email||'').toLowerCase().includes(filter));
+      list.replaceChildren();
+      if(!users.length){ list.innerHTML = '<div class="muted tiny" style="padding:16px">Tidak ada user lain.</div>'; return; }
+      for(const u of users){
+        const b=document.createElement("button");b.className="item";
+        const av=document.createElement("div");av.className="avatar";av.textContent=initials(u.displayName||u.email);
+        const meta=document.createElement("div");meta.className="meta";
+        const title=document.createElement("strong");title.textContent=u.displayName||u.email;
+        const last=document.createElement("span");last.className="last";last.textContent=u.email;
+        meta.append(title,last);b.append(av,meta);
+        b.onclick=()=>startDirectWithUser(u);
+        list.append(b);
+      }
+    } catch(e) { list.innerHTML = '<div class="muted tiny" style="padding:16px">Gagal memuat kontak: pastikan Rules Firestore ngizinin read di users.</div>'; }
+    return;
+  }
+
+  let rows = chatRows.filter(c => currentTab === "groups" ? c.type === "group" : c.type !== "group");
+  rows = rows.filter(c=>chatName(c).toLowerCase().includes(filter));
   if(!rows.length){list.innerHTML='<div class="muted tiny" style="padding:16px">Belum ada data.</div>';return;}
   for(const c of rows){
     const b=document.createElement("button");b.className="item"+(c.id===activeChatId?" selected":"");
@@ -332,19 +345,26 @@ function renderChats(){
   }
 }
 
-async function findUser(){
-  const email=prompt("Email pengguna yang sudah mendaftar:");if(!email)return null;
+async function startDirect(){
+  const email=prompt("Email pengguna yang sudah mendaftar:");if(!email)return;
   const snap=await getDocs(query(collection(db,"users"),where("email","==",email.trim().toLowerCase()),limit(1)));
-  if(snap.empty){toast("Pengguna tidak ditemukan.");return null;}
-  const p=snap.docs[0].data();if(p.uid===me.uid){toast("Tidak bisa chat dengan akun sendiri.");return null;}return p;
+  if(snap.empty){toast("Pengguna tidak ditemukan.");return;}
+  const p=snap.docs[0].data();if(p.uid===me.uid){toast("Tidak bisa chat dengan akun sendiri.");return;}
+  await startDirectWithUser(p);
 }
 
-async function startDirect(){
+async function startDirectWithUser(p){
   try{
-    const p=await findUser();if(!p)return;
     const members=[me.uid,p.uid].sort(),id="dm_"+members.join("_"),refDoc=doc(db,"chats",id),existing=await getDoc(refDoc);
-    if(!existing.exists())await setDoc(refDoc,{type:"direct",members,memberProfiles:[{uid:me.uid,displayName:me.displayName||me.email.split("@")[0],email:me.email},{uid:p.uid,displayName:p.displayName,email:p.email}],createdBy:me.uid,createdAt:serverTimestamp(),updatedAt:serverTimestamp(),lastMessage:""});
-    const data=(await getDoc(refDoc)).data();await openChat({id,...data});
+    if(!existing.exists()){
+      await setDoc(refDoc,{
+        type:"direct",members,
+        memberProfiles:[{uid:me.uid,displayName:me.displayName||me.email.split("@")[0],email:me.email},{uid:p.uid,displayName:p.displayName||p.email,email:p.email}],
+        createdBy:me.uid,createdAt:serverTimestamp(),updatedAt:serverTimestamp(),lastMessage:""
+      });
+    }
+    const data=(await getDoc(refDoc)).data();
+    await openChat({id,...data});
   }catch(e){toast(e.message);}
 }
 
