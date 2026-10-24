@@ -194,7 +194,7 @@ const GLOBAL_GROUP_ID = "global_apaaja", GLOBAL_GROUP_NAME = "apa aja✌🏻😹
 const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app), storage = getStorage(app);
 const $ = id => document.getElementById(id);
 
-let me=null, isRegister=false, activeChatId=null, activeChatData=null, stopChats=null, stopMessages=null, chatRows=[], currentTab="chats";
+let me=null, isRegister=false, activeChatId=null, activeChatData=null, stopChats=null, stopMessages=null, stopContacts=null, chatRows=[], contactRows=[], currentTab="chats";
 const initials = s => (s||"U").trim().slice(0,1).toUpperCase();
 const timeText = t => t?.toDate ? t.toDate().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}) : "…";
 function toast(s){$("toast").textContent=s;$("toast").classList.add("show");setTimeout(()=>$("toast").classList.remove("show"),3000);}
@@ -253,15 +253,15 @@ onAuthStateChanged(auth, async user=>{
     $("myAvatar").textContent=initials(dn);
     await setDoc(doc(db,"users",user.uid),{uid:user.uid,displayName:dn,email:user.email,lastSeen:serverTimestamp()},{merge:true});
     try{ await ensureGlobalGroup(user, dn); }catch(e){ console.warn(e); }
-    listenChats();
+    listenData();
     switchTab("chats");
   } else {
     me=null;
     $("app-view").classList.remove("active");
     $("auth-view").classList.add("active");
-    if(stopChats)stopChats();if(stopMessages)stopMessages();
-    stopChats=null;stopMessages=null;
-    activeChatId=null;activeChatData=null;chatRows=[];
+    if(stopChats)stopChats(); if(stopMessages)stopMessages(); if(stopContacts)stopContacts();
+    stopChats=null; stopMessages=null; stopContacts=null;
+    activeChatId=null; activeChatData=null; chatRows=[]; contactRows=[];
     $("authForm").reset();
     $("chatArea").classList.remove("open");
     setMode(false);
@@ -275,11 +275,11 @@ function switchTab(tab){
   const titles = {chats:"Chat Pribadi", groups:"Group", contacts:"Kontak User", account:"Akun Saya"};
   $("listTitle").textContent = titles[tab];
   $("chatArea").classList.remove("open");
-  renderChats();
+  renderList();
 }
 
 $("logout").onclick=()=>signOut(auth);
-$("search").addEventListener("input",renderChats);
+$("search").addEventListener("input",renderList);
 $("newChat").onclick=startDirect;
 $("newGroup").onclick=startGroup;
 $("back").onclick=()=>{ if(window.innerWidth<=720) $("chatArea").classList.remove("open"); else $("chatArea").classList.add("hidden-desk"); };
@@ -287,12 +287,23 @@ $("media").onchange=()=>{$("fileNote").style.display="block";$("fileNote").textC
 $("voice").onchange=()=>{$("fileNote").style.display="block";$("fileNote").textContent=$("voice").files[0]?"Voice note: "+$("voice").files[0].name:"";};
 $("composer").addEventListener("submit",sendMessage);
 
-function listenChats(){
+function listenData(){
   if(stopChats)stopChats();
-  stopChats=onSnapshot(collection(db,"chats"),snap=>{
-    chatRows = snap.docs.map(d=>({id:d.id,...d.data()})).filter(c => (c.members||[]).includes(me.uid));
-    renderChats();
-  },err=>toast("Chat: "+err.message));
+  if(stopContacts)stopContacts();
+
+  // FIX: Pakai array-contains agar Firestore tidak protes soal rules read chats
+  stopChats = onSnapshot(
+    query(collection(db,"chats"), where("members","array-contains",me.uid)),
+    snap=>{ chatRows = snap.docs.map(d=>({id:d.id,...d.data()})); if(currentTab==="chats"||currentTab==="groups") renderList(); },
+    err=>toast("Gagal load chat: "+err.message)
+  );
+
+  // FIX: Realtime listener buat contacts
+  stopContacts = onSnapshot(
+    query(collection(db,"users")),
+    snap=>{ contactRows = snap.docs.map(d=>d.data()).filter(u=>u.uid!==me.uid); if(currentTab==="contacts") renderList(); },
+    err=>console.warn("Gagal load kontak:", err.message)
+  );
 }
 
 function chatName(c){
@@ -301,34 +312,28 @@ function chatName(c){
   return other?.displayName||other?.email||"Chat pribadi";
 }
 
-async function renderChats(){
-  const list=$("list");list.replaceChildren();
+function renderList(){
+  const list=$("list"); list.replaceChildren();
   const filter=$("search").value.toLowerCase();
-  
+
   if(currentTab === "account"){
     list.innerHTML = `<div style="padding:20px"><p><strong>Email:</strong><br>${me.email}</p><p><strong>Nama:</strong><br>${me.displayName||'-'}</p><p><strong>UID:</strong><br><span class="tiny muted">${me.uid}</span></p></div>`;
     return;
   }
 
   if(currentTab === "contacts"){
-    list.innerHTML = '<div class="muted tiny" style="padding:16px">Memuat kontak…</div>';
-    try {
-      const snap = await getDocs(collection(db, "users"));
-      let users = snap.docs.map(d=>d.data()).filter(u=>u.uid !== me.uid);
-      users = users.filter(u => (u.displayName||'').toLowerCase().includes(filter) || (u.email||'').toLowerCase().includes(filter));
-      list.replaceChildren();
-      if(!users.length){ list.innerHTML = '<div class="muted tiny" style="padding:16px">Tidak ada user lain.</div>'; return; }
-      for(const u of users){
-        const b=document.createElement("button");b.className="item";
-        const av=document.createElement("div");av.className="avatar";av.textContent=initials(u.displayName||u.email);
-        const meta=document.createElement("div");meta.className="meta";
-        const title=document.createElement("strong");title.textContent=u.displayName||u.email;
-        const last=document.createElement("span");last.className="last";last.textContent=u.email;
-        meta.append(title,last);b.append(av,meta);
-        b.onclick=()=>startDirectWithUser(u);
-        list.append(b);
-      }
-    } catch(e) { list.innerHTML = '<div class="muted tiny" style="padding:16px">Gagal memuat kontak: pastikan Rules Firestore ngizinin read di users.</div>'; }
+    const users = contactRows.filter(u => (u.displayName||'').toLowerCase().includes(filter) || (u.email||'').toLowerCase().includes(filter));
+    if(!users.length){ list.innerHTML = '<div class="muted tiny" style="padding:16px">Belum ada user lain yang terdaftar.</div>'; return; }
+    for(const u of users){
+      const b=document.createElement("button");b.className="item";
+      const av=document.createElement("div");av.className="avatar";av.textContent=initials(u.displayName||u.email);
+      const meta=document.createElement("div");meta.className="meta";
+      const title=document.createElement("strong");title.textContent=u.displayName||u.email;
+      const last=document.createElement("span");last.className="last";last.textContent=u.email;
+      meta.append(title,last);b.append(av,meta);
+      b.onclick=()=>startDirectWithUser(u);
+      list.append(b);
+    }
     return;
   }
 
@@ -388,7 +393,7 @@ async function openChat(c){
   $("empty").style.display="none";$("active").style.display="flex";$("chatArea").classList.remove("hidden-desk");
   $("chatTitle").textContent=chatName(c);$("chatAvatar").textContent=initials(chatName(c));$("chatStatus").textContent=c.type==="group"?"Grup chat":"Chat pribadi";
   if(window.innerWidth<=720) $("chatArea").classList.add("open");
-  renderChats();
+  renderList();
   if(stopMessages)stopMessages();
   stopMessages=onSnapshot(query(collection(db,"chats",c.id,"messages"),orderBy("createdAt","asc"),limit(200)),snap=>{
     const box=$("messages");box.replaceChildren();for(const d of snap.docs)renderMessage(d.id,d.data());box.scrollTop=box.scrollHeight;
