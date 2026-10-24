@@ -9,12 +9,23 @@ service firebase.storage {
             /databases/(default)/documents/chats/$(chatId)
           ).data.members;
       }
+      function isImage() { return request.resource.contentType.matches('image/.*'); }
+      function isVideo() { return request.resource.contentType.matches('video/.*'); }
+      function isAudio() { return request.resource.contentType.matches('audio/.*'); }
+
       allow read: if isMember();
+
       allow create: if isMember()
         && request.auth.uid == uid
         && request.resource.size < 25 * 1024 * 1024
-        && request.resource.contentType.matches('(image/.*|video/.*|audio/.*)');
-      allow update, delete: if isMember() && request.auth.uid == uid;
+        && (isImage() || isVideo() || isAudio());
+
+      allow update: if isMember()
+        && request.auth.uid == uid
+        && request.resource.size < 25 * 1024 * 1024
+        && (isImage() || isVideo() || isAudio());
+
+      allow delete: if isMember() && request.auth.uid == uid;
     }
   }
 }
