@@ -111,7 +111,7 @@ input:focus{outline:none;border-color:var(--bright);box-shadow:0 0 0 3px rgba(0,
     <label id="nameWrap" hidden>Nama tampilan<input id="name" maxlength="50" placeholder="Nama kamu"></label>
     <label>Email<input id="email" type="email" autocomplete="email" required placeholder="nama@email.com"></label>
     <label>Password<input id="password" type="password" autocomplete="current-password" minlength="6" required placeholder="Minimal 6 karakter"></label>
-    <button id="authSubmit" class="primary" type="submit">Login</button>
+    <button id="authSubmit" class="primary">Login</button>
   </form>
   <p id="authNote" class="notice" role="status"></p>
 </section>
@@ -174,6 +174,7 @@ const configured = !Object.values(firebaseConfig).some(v => v.startsWith("GANTI_
 const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app), storage = getStorage(app);
 const $ = id => document.getElementById(id);
 let me=null, isRegister=false, activeChatId=null, activeChatData=null, stopChats=null, stopMessages=null, chatRows=[];
+const escapeHtml = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const initials = s => (s||"U").trim().slice(0,1).toUpperCase();
 const timeText = t => t?.toDate ? t.toDate().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}) : "…";
 function toast(s){$("toast").textContent=s;$("toast").classList.add("show");setTimeout(()=>$("toast").classList.remove("show"),3000);}
@@ -186,12 +187,11 @@ function setMode(reg){
   $("nameWrap").hidden=!reg;
   $("name").required=reg;
   $("authSubmit").textContent=reg?"Buat akun":"Login";
-  $("authSubmit").disabled=false;
   authNote("");
 }
 $("loginTab").onclick=()=>setMode(false);
 $("registerTab").onclick=()=>setMode(true);
-setMode(false);
+setMode(false); // FIX: inisialisasi mode awal biar isRegister sinkron
 
 async function ensureGlobalGroup(user, displayName){
   const chatRef = doc(db, "chats", GLOBAL_GROUP_ID);
@@ -225,12 +225,8 @@ async function ensureGlobalGroup(user, displayName){
 }
 
 $("authForm").addEventListener("submit",async e=>{
- e.preventDefault();
- if(!configured){authNote("Isi firebaseConfig di index.html dulu.");return;}
- const submitBtn=$("authSubmit");
- if(submitBtn.disabled)return;
- submitBtn.disabled=true;
- authNote("");
+ e.preventDefault();if(!configured){authNote("Isi firebaseConfig di index.html dulu.");return;}
+ $("authSubmit").disabled=true;
  try{
   if(isRegister){
    const cred=await createUserWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);
@@ -238,46 +234,25 @@ $("authForm").addEventListener("submit",async e=>{
    await updateProfile(cred.user,{displayName});
    await setDoc(doc(db,"users",cred.user.uid),{uid:cred.user.uid,displayName,email:cred.user.email,createdAt:serverTimestamp(),lastSeen:serverTimestamp()});
    await ensureGlobalGroup(cred.user, displayName);
-  }else{
-   await signInWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);
-  }
-  $("authForm").reset();
- }catch(err){
-  authNote(
-    err.code==="auth/invalid-credential"||err.code==="auth/wrong-password"||err.code==="auth/user-not-found"
-      ? "Email atau password salah."
-    : err.code==="auth/email-already-in-use"
-      ? "Email sudah terdaftar. Coba login."
-    : err.code==="auth/weak-password"
-      ? "Password minimal 6 karakter."
-    : err.code==="auth/invalid-email"
-      ? "Format email tidak valid."
-    : err.message
-  );
- }finally{
-  submitBtn.disabled=false;
- }
+  }else await signInWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);
+ }catch(err){authNote(err.message);}finally{$("authSubmit").disabled=false;}
 });
 
 onAuthStateChanged(auth,async user=>{
  if(user){
-  me=user;
-  $("auth").hidden=true;$("shell").hidden=false;
-  const dn = user.displayName || user.email.split("@")[0];
-  $("myName").textContent = dn;
-  $("myAvatar").textContent = initials(dn);
+  me=user;$("auth").hidden=true;$("shell").hidden=false;
+  const dn=user.displayName||user.email.split("@")[0];
+  $("myName").textContent=dn;
+  $("myAvatar").textContent=initials(dn);
   await setDoc(doc(db,"users",user.uid),{uid:user.uid,displayName:dn,email:user.email,lastSeen:serverTimestamp()},{merge:true});
   try{ await ensureGlobalGroup(user, dn); }catch(e){ console.warn("global group:", e.message); }
   listenChats();
- } else {
+ }else{
   $("auth").hidden=false;$("shell").hidden=true;me=null;
   if(stopChats)stopChats();if(stopMessages)stopMessages();
   stopChats=null;stopMessages=null;
   activeChatId=null;activeChatData=null;chatRows=[];
-  $("authForm").reset();
-  $("authSubmit").disabled=false;
-  $("shell").classList.remove("show-chat");
-  setMode(false);
+  $("authForm").reset(); // FIX: bersihin form pas logout
  }
 });
 
@@ -302,8 +277,7 @@ function chatName(c){
  return other?.displayName||other?.email||"Chat pribadi";
 }
 function renderChats(){
- const list=$("list");list.replaceChildren();
- const filter=$("search").value.toLowerCase();
+ const list=$("list");list.replaceChildren();const filter=$("search").value.toLowerCase();
  const rows=chatRows.filter(c=>chatName(c).toLowerCase().includes(filter));
  if(!rows.length){list.innerHTML='<div class="muted tiny" style="padding:16px">Belum ada chat. Tekan tombol +.</div>';return;}
  for(const c of rows){
@@ -345,24 +319,16 @@ async function startGroup(){
  }catch(e){toast(e.message);}
 }
 async function openChat(c){
- activeChatId=c.id;activeChatData=c;
- $("empty").hidden=true;$("active").hidden=false;
- $("chatTitle").textContent=chatName(c);$("chatAvatar").textContent=initials(chatName(c));
- $("chatStatus").textContent=c.type==="group"?"Grup chat":"Chat pribadi";
- $("shell").classList.add("show-chat");$("back").hidden=window.innerWidth>720;
- renderChats();
+ activeChatId=c.id;activeChatData=c;$("empty").hidden=true;$("active").hidden=false;$("chatTitle").textContent=chatName(c);$("chatAvatar").textContent=initials(chatName(c));$("chatStatus").textContent=c.type==="group"?"Grup chat":"Chat pribadi";
+ $("shell").classList.add("show-chat");$("back").hidden=window.innerWidth>720;renderChats();
  if(stopMessages)stopMessages();
  stopMessages=onSnapshot(query(collection(db,"chats",c.id,"messages"),orderBy("createdAt","asc"),limit(200)),snap=>{
-  const box=$("messages");box.replaceChildren();
-  for(const d of snap.docs)renderMessage(d.id,d.data());
-  box.scrollTop=box.scrollHeight;
+  const box=$("messages");box.replaceChildren();for(const d of snap.docs)renderMessage(d.id,d.data());box.scrollTop=box.scrollHeight;
  },err=>toast("Pesan: "+err.message));
 }
 function renderMessage(id,m){
  const el=document.createElement("div");el.className="msg"+(m.senderId===me.uid?" mine":"");el.dataset.id=id;
- if(activeChatData?.type==="group" && m.senderId!==me.uid){
-  const s=document.createElement("div");s.className="sender";s.textContent=m.senderName||"User";el.append(s);
- }
+ if(activeChatData?.type==="group" && m.senderId!==me.uid){const s=document.createElement("div");s.className="sender";s.textContent=m.senderName||"User";el.append(s);}
  if(m.type==="text"){const text=document.createElement("div");text.textContent=m.text||"";el.append(text);}
  else if(m.url){
   if(m.type==="image"){const img=document.createElement("img");img.src=m.url;img.alt="Foto";img.loading="lazy";el.append(img);}
@@ -370,14 +336,11 @@ function renderMessage(id,m){
   else if(m.type==="audio"){const a=document.createElement("audio");a.src=m.url;a.controls=true;el.append(a);}
   if(m.text){const t=document.createElement("div");t.textContent=m.text;el.append(t);}
  }
- const time=document.createElement("div");time.className="time";
- time.textContent=timeText(m.createdAt);
+ const time=document.createElement("div");time.className="time";time.textContent=timeText(m.createdAt);
  if(m.senderId===me.uid){
-  const svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
-  svg.setAttribute("viewBox","0 0 24 24");
-  const p = m.readBy?.length>1 ? "M1 12l5 5L18 5M8 12l5 5L23 5" : "M4 12l5 5L20 6";
-  const path = document.createElementNS("http://www.w3.org/2000/svg","path");
-  path.setAttribute("d",p);svg.append(path);time.append(svg);
+  const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");svg.setAttribute("viewBox","0 0 24 24");
+  const p=m.readBy?.length>1?"M1 12l5 5L18 5M8 12l5 5L23 5":"M4 12l5 5L20 6";
+  const path=document.createElementNS("http://www.w3.org/2000/svg","path");path.setAttribute("d",p);svg.append(path);time.append(svg);
  }
  el.append(time);$("messages").append(el);
 }
