@@ -111,7 +111,7 @@ input:focus{outline:none;border-color:var(--bright);box-shadow:0 0 0 3px rgba(0,
     <label id="nameWrap" hidden>Nama tampilan<input id="name" maxlength="50" placeholder="Nama kamu"></label>
     <label>Email<input id="email" type="email" autocomplete="email" required placeholder="nama@email.com"></label>
     <label>Password<input id="password" type="password" autocomplete="current-password" minlength="6" required placeholder="Minimal 6 karakter"></label>
-    <button id="authSubmit" class="primary">Login</button>
+    <button id="authSubmit" class="primary" type="submit">Login</button>
   </form>
   <p id="authNote" class="notice" role="status"></p>
 </section>
@@ -174,13 +174,24 @@ const configured = !Object.values(firebaseConfig).some(v => v.startsWith("GANTI_
 const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app), storage = getStorage(app);
 const $ = id => document.getElementById(id);
 let me=null, isRegister=false, activeChatId=null, activeChatData=null, stopChats=null, stopMessages=null, chatRows=[];
-const escapeHtml = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const initials = s => (s||"U").trim().slice(0,1).toUpperCase();
 const timeText = t => t?.toDate ? t.toDate().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}) : "…";
 function toast(s){$("toast").textContent=s;$("toast").classList.add("show");setTimeout(()=>$("toast").classList.remove("show"),3000);}
 function authNote(s){$("authNote").textContent=s;}
-function setMode(reg){isRegister=reg;$("loginTab").classList.toggle("active",!reg);$("registerTab").classList.toggle("active",reg);$("nameWrap").hidden=!reg;$("name").required=reg;$("authSubmit").textContent=reg?"Buat akun":"Login";authNote("");}
-$("loginTab").onclick=()=>setMode(false);$("registerTab").onclick=()=>setMode(true);
+
+function setMode(reg){
+  isRegister=reg;
+  $("loginTab").classList.toggle("active",!reg);
+  $("registerTab").classList.toggle("active",reg);
+  $("nameWrap").hidden=!reg;
+  $("name").required=reg;
+  $("authSubmit").textContent=reg?"Buat akun":"Login";
+  $("authSubmit").disabled=false;
+  authNote("");
+}
+$("loginTab").onclick=()=>setMode(false);
+$("registerTab").onclick=()=>setMode(true);
+setMode(false);
 
 async function ensureGlobalGroup(user, displayName){
   const chatRef = doc(db, "chats", GLOBAL_GROUP_ID);
@@ -206,6 +217,7 @@ async function ensureGlobalGroup(user, displayName){
       await updateDoc(chatRef, {
         members: arrayUnion(user.uid),
         memberProfiles: profiles,
+        createdBy: data.createdBy,
         updatedAt: serverTimestamp()
       });
     }
@@ -213,8 +225,12 @@ async function ensureGlobalGroup(user, displayName){
 }
 
 $("authForm").addEventListener("submit",async e=>{
- e.preventDefault();if(!configured){authNote("Isi firebaseConfig di index.html dulu.");return;}
- $("authSubmit").disabled=true;
+ e.preventDefault();
+ if(!configured){authNote("Isi firebaseConfig di index.html dulu.");return;}
+ const submitBtn=$("authSubmit");
+ if(submitBtn.disabled)return;
+ submitBtn.disabled=true;
+ authNote("");
  try{
   if(isRegister){
    const cred=await createUserWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);
@@ -225,7 +241,22 @@ $("authForm").addEventListener("submit",async e=>{
   }else{
    await signInWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);
   }
- }catch(err){authNote(err.message);}finally{$("authSubmit").disabled=false;}
+  $("authForm").reset();
+ }catch(err){
+  authNote(
+    err.code==="auth/invalid-credential"||err.code==="auth/wrong-password"||err.code==="auth/user-not-found"
+      ? "Email atau password salah."
+    : err.code==="auth/email-already-in-use"
+      ? "Email sudah terdaftar. Coba login."
+    : err.code==="auth/weak-password"
+      ? "Password minimal 6 karakter."
+    : err.code==="auth/invalid-email"
+      ? "Format email tidak valid."
+    : err.message
+  );
+ }finally{
+  submitBtn.disabled=false;
+ }
 });
 
 onAuthStateChanged(auth,async user=>{
@@ -241,6 +272,12 @@ onAuthStateChanged(auth,async user=>{
  } else {
   $("auth").hidden=false;$("shell").hidden=true;me=null;
   if(stopChats)stopChats();if(stopMessages)stopMessages();
+  stopChats=null;stopMessages=null;
+  activeChatId=null;activeChatData=null;chatRows=[];
+  $("authForm").reset();
+  $("authSubmit").disabled=false;
+  $("shell").classList.remove("show-chat");
+  setMode(false);
  }
 });
 
