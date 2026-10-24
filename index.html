@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#075e54">
+<title>ChatWave</title>
+<style>
+:root{--green:#075e54;--bright:#00a884;--bg:#0b141a;--panel:#111b21;--panel2:#202c33;--line:#2a3942;--text:#e9edef;--muted:#9aaab2;--bubble:#202c33}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px system-ui,-apple-system,Segoe UI,sans-serif}button,input{font:inherit}button{cursor:pointer;border:0;color:inherit}input{width:100%;background:#0b141a;border:1px solid var(--line);border-radius:9px;color:var(--text);padding:12px}button:focus-visible,input:focus-visible{outline:2px solid #53bdeb;outline-offset:2px}[hidden]{display:none!important}.app{min-height:100dvh;display:grid;place-items:center;padding:18px;background:linear-gradient(180deg,#075e54 0 18%,#0b141a 18% 100%)}.auth{width:min(100%,400px);background:var(--panel);border:1px solid var(--line);padding:28px;border-radius:16px}.brand{font-size:22px;font-weight:800;display:flex;align-items:center;gap:9px;margin-bottom:8px}.logo{width:34px;height:34px;border-radius:50%;background:var(--bright);color:#062e27;display:grid;place-items:center}.muted{color:var(--muted)}.tiny{font-size:12px}.auth form{display:grid;gap:10px;margin-top:22px}.auth input{margin-top:5px}.primary{background:var(--bright);color:#052e27;font-weight:750;padding:12px;border-radius:9px}.tabrow{display:flex;gap:8px;margin-top:20px}.tab{flex:1;padding:10px;background:var(--panel2);border-radius:8px}.tab.active{background:var(--bright);color:#052e27}.notice{min-height:18px;color:#ffd180;font-size:13px}.shell{width:min(1300px,100%);height:min(900px,calc(100dvh - 36px));min-height:540px;display:grid;grid-template-columns:330px 1fr;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel);box-shadow:0 20px 70px #0005}.side{display:flex;flex-direction:column;border-right:1px solid var(--line);min-width:0}.top{display:flex;align-items:center;gap:10px;padding:14px;background:var(--panel2);min-height:66px}.top .brand{margin:0;font-size:19px}.actions{display:flex;gap:7px;margin-left:auto}.actions button,.circle{width:38px;height:38px;border-radius:50%;background:#34434b}.me{display:flex;align-items:center;gap:10px;padding:12px;border-bottom:1px solid var(--line)}.avatar{width:42px;height:42px;flex:none;border-radius:50%;background:#176b5b;display:grid;place-items:center;font-weight:800}.meta{display:flex;flex-direction:column;min-width:0}.meta strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.search{padding:10px}.search input{background:var(--panel2);border:0}.section{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:6px 14px}.list{overflow:auto;flex:1}.item{width:100%;display:flex;align-items:center;gap:10px;text-align:left;background:transparent;padding:12px;border-bottom:1px solid #202c33}.item:hover,.item.selected{background:var(--panel2)}.item .meta{flex:1}.last{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:210px}.chat{position:relative;min-width:0;background:#0b141a}.empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;color:var(--muted)}.empty .logo{width:75px;height:75px;font-size:38px}.active{height:100%;display:flex;flex-direction:column}.chathead{display:flex;align-items:center;gap:10px;padding:12px;background:var(--panel2);border-bottom:1px solid var(--line)}.chathead .meta{flex:1}.messages{flex:1;overflow:auto;display:flex;flex-direction:column;gap:8px;padding:20px clamp(10px,4vw,48px);background-image:radial-gradient(#ffffff08 1px,transparent 1px);background-size:18px 18px}.msg{align-self:flex-start;max-width:min(78%,520px);padding:9px 11px;background:var(--bubble);border-radius:10px;overflow-wrap:anywhere}.msg.mine{align-self:flex-end;background:#005c4b}.msg img,.msg video{display:block;max-width:100%;max-height:300px;border-radius:7px;margin-bottom:6px}.msg audio{max-width:100%}.time{text-align:right;font-size:10px;color:#c2d1d7;margin-top:4px}.composer{display:flex;align-items:center;gap:8px;padding:10px;background:var(--panel2)}.composer input[type=text]{margin:0;background:#2a3942;border:0;border-radius:24px}.attach{width:42px;height:42px;border-radius:50%;background:#34434b;display:grid;place-items:center;font-size:22px;cursor:pointer;flex:none}.send{width:42px;height:42px;flex:none;border-radius:50%;background:var(--bright);color:#052e27;font-size:18px}.toast{position:fixed;display:none;bottom:18px;left:50%;transform:translateX(-50%);background:#263740;padding:11px 16px;border:1px solid var(--line);border-radius:10px;max-width:90vw;z-index:5}.toast.show{display:block}
+@media(max-width:720px){.app{padding:0;background:var(--bg)}.shell{height:100dvh;min-height:0;border:0;border-radius:0;grid-template-columns:1fr}.chat{display:none}.shell.show-chat .side{display:none}.shell.show-chat .chat{display:block}.auth{border-radius:0;min-height:100dvh;display:flex;flex-direction:column;justify-content:center}.messages{padding:14px 10px}.msg{max-width:90%}}
+</style>
+</head>
+<body>
+<main class="app">
+<section id="auth" class="auth">
+  <div class="brand"><span class="logo">◉</span> ChatWave</div>
+  <div class="muted">Chat simpel, langsung realtime.</div>
+  <div class="tabrow"><button id="loginTab" class="tab active" type="button">Login</button><button id="registerTab" class="tab" type="button">Daftar</button></div>
+  <form id="authForm">
+    <label id="nameWrap" hidden>Nama tampilan<input id="name" maxlength="50" placeholder="Nama kamu"></label>
+    <label>Email<input id="email" type="email" autocomplete="email" required placeholder="nama@email.com"></label>
+    <label>Password<input id="password" type="password" autocomplete="current-password" minlength="6" required placeholder="Minimal 6 karakter"></label>
+    <button id="authSubmit" class="primary">Login</button>
+  </form>
+  <p id="authNote" class="notice" role="status"></p>
+  <p class="tiny muted">Setup dulu Firebase config di bagian bawah file ini.</p>
+</section>
+
+<section id="shell" class="shell" hidden>
+  <aside class="side">
+    <header class="top"><div class="brand"><span class="logo">◉</span> ChatWave</div><div class="actions"><button id="newChat" title="Chat baru">＋</button><button id="newGroup" title="Grup baru">♧</button><button id="logout" title="Keluar">↪</button></div></header>
+    <div class="me"><div id="myAvatar" class="avatar">K</div><div class="meta"><strong id="myName">Kamu</strong><span class="tiny muted">Akun kamu</span></div></div>
+    <div class="search"><input id="search" placeholder="Cari chat…" autocomplete="off"></div>
+    <div class="section">Percakapan</div>
+    <div id="list" class="list"></div>
+  </aside>
+  <section class="chat">
+    <div id="empty" class="empty"><div class="logo">◉</div><h2>ChatWave</h2><p>Pilih chat atau tekan ＋ untuk memulai.</p></div>
+    <div id="active" class="active" hidden>
+      <header class="chathead"><button id="back" class="circle" hidden aria-label="Kembali">‹</button><div id="chatAvatar" class="avatar">C</div><div class="meta"><strong id="chatTitle">Chat</strong><span id="chatStatus" class="tiny muted">Pesan realtime</span></div></header>
+      <div id="messages" class="messages"></div>
+      <div id="fileNote" class="tiny muted" style="padding:0 14px 6px" hidden></div>
+      <form id="composer" class="composer">
+        <label class="attach" title="Foto/video">＋<input id="media" type="file" accept="image/*,video/*" hidden></label>
+        <label class="attach" title="Voice note">🎙<input id="voice" type="file" accept="audio/*" capture hidden></label>
+        <input id="message" type="text" maxlength="3000" placeholder="Tulis pesan…" autocomplete="off">
+        <button class="send" aria-label="Kirim">➤</button>
+      </form>
+    </div>
+  </section>
+</section>
+</main>
+<div id="toast" class="toast" role="status"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, query, where, orderBy, limit, onSnapshot, serverTimestamp, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
+
+/* GANTI nilai ini dari Firebase Console > Project settings > Your apps.
+   Config web Firebase bukan service-account key. Jangan pernah memasukkan private key. */
+const firebaseConfig = {
+  apiKey: "AIzaSyCk6I02APluxxZlYdrGPkof5zOeAWaPY9w",
+  authDomain: "chat-25463.firebaseapp.com",
+  projectId: "chat-25463",
+  storageBucket: "chat-25463.firebasestorage.app",
+  messagingSenderId: "341938397051",
+  appId: "1:341938397051:web:fafa5e12daa6ff27c727de"
+};
+const configured = !Object.values(firebaseConfig).some(v => v.startsWith("GANTI_"));
+const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app), storage = getStorage(app);
+const $ = id => document.getElementById(id);
+let me=null, isRegister=false, activeChatId=null, activeChatData=null, stopChats=null, stopMessages=null, chatRows=[];
+const escapeHtml = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const initials = s => (s||"U").trim().slice(0,1).toUpperCase();
+const timeText = t => t?.toDate ? t.toDate().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}) : "…";
+function toast(s){$("toast").textContent=s;$("toast").classList.add("show");setTimeout(()=>$("toast").classList.remove("show"),3000);}
+function authNote(s){$("authNote").textContent=s;}
+function setMode(reg){isRegister=reg;$("loginTab").classList.toggle("active",!reg);$("registerTab").classList.toggle("active",reg);$("nameWrap").hidden=!reg;$("name").required=reg;$("authSubmit").textContent=reg?"Buat akun":"Login";authNote("");}
+$("loginTab").onclick=()=>setMode(false);$("registerTab").onclick=()=>setMode(true);
+$("authForm").addEventListener("submit",async e=>{
+ e.preventDefault();if(!configured){authNote("Isi firebaseConfig di index.html dulu.");return;}
+ $("authSubmit").disabled=true;
+ try{
+  if(isRegister){
+   const cred=await createUserWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);
+   const displayName=$("name").value.trim()||$("email").value.split("@")[0];
+   await updateProfile(cred.user,{displayName});
+   await setDoc(doc(db,"users",cred.user.uid),{uid:cred.user.uid,displayName,email:cred.user.email,createdAt:serverTimestamp(),lastSeen:serverTimestamp()});
+  }else await signInWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);
+ }catch(err){authNote(err.message);}finally{$("authSubmit").disabled=false;}
+});
+onAuthStateChanged(auth,async user=>{
+ if(user){me=user;$("auth").hidden=true;$("shell").hidden=false;$("myName").textContent=user.displayName||user.email;$("myAvatar").textContent=initials(user.displayName||user.email);await setDoc(doc(db,"users",user.uid),{uid:user.uid,displayName:user.displayName||user.email.split("@")[0],email:user.email,lastSeen:serverTimestamp()},{merge:true});listenChats();}
+ else{$("auth").hidden=false;$("shell").hidden=true;me=null;if(stopChats)stopChats();if(stopMessages)stopMessages();}
+});
+$("logout").onclick=()=>signOut(auth);
+$("search").addEventListener("input",renderChats);
+$("newChat").onclick=startDirect;
+$("newGroup").onclick=startGroup;
+$("back").onclick=()=>{$("shell").classList.remove("show-chat");};
+$("media").onchange=()=>{$("fileNote").hidden=!$("media").files[0];$("fileNote").textContent=$("media").files[0]?.name||"";};
+$("voice").onchange=()=>{$("fileNote").hidden=!$("voice").files[0];$("fileNote").textContent=$("voice").files[0]?"Voice note: "+$("voice").files[0].name:"";};
+$("composer").addEventListener("submit",sendMessage);
+
+function listenChats(){
+ if(stopChats)stopChats();
+ stopChats=onSnapshot(query(collection(db,"chats"),where("members","array-contains",me.uid),orderBy("updatedAt","desc")),snap=>{
+  chatRows=snap.docs.map(d=>({id:d.id,...d.data()}));renderChats();
+ },err=>toast("Chat: "+err.message));
+}
+function chatName(c){
+ if(c.type==="group")return c.name||"Grup";
+ const other=(c.memberProfiles||[]).find(p=>p.uid!==me.uid);
+ return other?.displayName||other?.email||"Chat pribadi";
+}
+function renderChats(){
+ const list=$("list");list.replaceChildren();const filter=$("search").value.toLowerCase();
+ const rows=chatRows.filter(c=>chatName(c).toLowerCase().includes(filter));
+ if(!rows.length){list.innerHTML='<div class="muted tiny" style="padding:16px">Belum ada chat. Tekan ＋.</div>';return;}
+ for(const c of rows){
+  const b=document.createElement("button");b.className="item"+(c.id===activeChatId?" selected":"");
+  const av=document.createElement("div");av.className="avatar";av.textContent=initials(chatName(c));
+  const meta=document.createElement("div");meta.className="meta";
+  const title=document.createElement("strong");title.textContent=chatName(c);
+  const last=document.createElement("span");last.className="last";last.textContent=c.lastMessage||"Belum ada pesan";
+  meta.append(title,last);b.append(av,meta);b.onclick=()=>openChat(c);list.append(b);
+ }
+}
+async function findUser(){
+ const email=prompt("Email pengguna yang sudah mendaftar:");if(!email)return null;
+ const snap=await getDocs(query(collection(db,"users"),where("email","==",email.trim().toLowerCase()),limit(1)));
+ if(snap.empty){toast("Pengguna tidak ditemukan. Pastikan email benar.");return null;}
+ const p=snap.docs[0].data();if(p.uid===me.uid){toast("Tidak bisa chat dengan akun sendiri.");return null;}return p;
+}
+async function startDirect(){
+ try{
+  const p=await findUser();if(!p)return;
+  const members=[me.uid,p.uid].sort();const id="dm_"+members.join("_");
+  const refDoc=doc(db,"chats",id),existing=await getDoc(refDoc);
+  if(!existing.exists())await setDoc(refDoc,{type:"direct",members,memberProfiles:[{uid:me.uid,displayName:me.displayName||me.email.split("@")[0],email:me.email},{uid:p.uid,displayName:p.displayName,email:p.email}],createdBy:me.uid,createdAt:serverTimestamp(),updatedAt:serverTimestamp(),lastMessage:""});
+  const data=(await getDoc(refDoc)).data();await openChat({id,...data});
+ }catch(e){toast(e.message);}
+}
+async function startGroup(){
+ const name=prompt("Nama grup:");if(!name?.trim())return;
+ const emails=prompt("Email anggota, pisahkan dengan koma:")||"";
+ try{
+  const members=new Map([[me.uid,{uid:me.uid,displayName:me.displayName||me.email.split("@")[0],email:me.email}]]);
+  for(const email of emails.split(",").map(s=>s.trim().toLowerCase()).filter(Boolean)){
+   const snap=await getDocs(query(collection(db,"users"),where("email","==",email),limit(1)));
+   if(!snap.empty){const p=snap.docs[0].data();members.set(p.uid,{uid:p.uid,displayName:p.displayName,email:p.email});}
+  }
+  if(members.size<2){toast("Masukkan minimal satu email anggota yang terdaftar.");return;}
+  const chat=await addDoc(collection(db,"chats"),{type:"group",name:name.trim(),members:[...members.keys()],memberProfiles:[...members.values()],createdBy:me.uid,createdAt:serverTimestamp(),updatedAt:serverTimestamp(),lastMessage:"Grup dibuat"});
+  await openChat({id:chat.id,type:"group",name:name.trim(),members:[...members.keys()],memberProfiles:[...members.values()]});
+ }catch(e){toast(e.message);}
+}
+async function openChat(c){
+ activeChatId=c.id;activeChatData=c;$("empty").hidden=true;$("active").hidden=false;$("chatTitle").textContent=chatName(c);$("chatAvatar").textContent=initials(chatName(c));$("chatStatus").textContent=c.type==="group"?"Grup chat":"Chat pribadi";
+ $("shell").classList.add("show-chat");$("back").hidden=window.innerWidth>720;renderChats();
+ if(stopMessages)stopMessages();
+ stopMessages=onSnapshot(query(collection(db,"chats",c.id,"messages"),orderBy("createdAt","asc"),limit(200)),snap=>{
+  const box=$("messages");box.replaceChildren();for(const d of snap.docs)renderMessage(d.id,d.data());box.scrollTop=box.scrollHeight;
+ },err=>toast("Pesan: "+err.message));
+}
+function renderMessage(id,m){
+ const el=document.createElement("div");el.className="msg"+(m.senderId===me.uid?" mine":"");el.dataset.id=id;
+ if(m.type==="text"){const text=document.createElement("div");text.textContent=m.text||"";el.append(text);}
+ else if(m.url){
+  if(m.type==="image"){const img=document.createElement("img");img.src=m.url;img.alt="Foto";img.loading="lazy";el.append(img);}
+  else if(m.type==="video"){const v=document.createElement("video");v.src=m.url;v.controls=true;v.playsInline=true;el.append(v);}
+  else if(m.type==="audio"){const a=document.createElement("audio");a.src=m.url;a.controls=true;el.append(a);}
+  if(m.text){const t=document.createElement("div");t.textContent=m.text;el.append(t);}
+ }
+ const time=document.createElement("div");time.className="time";time.textContent=timeText(m.createdAt)+(m.senderId===me.uid?(m.readBy?.length>1?" · ✓✓":" · ✓"):"");el.append(time);$("messages").append(el);
+}
+async function sendMessage(e){
+ e.preventDefault();if(!activeChatId)return;
+ const text=$("message").value.trim(),media=$("media").files[0],voice=$("voice").files[0],file=media||voice;
+ if(!text&&!file)return;
+ const btn=$("composer").querySelector("button[type=submit]");btn.disabled=true;
+ try{
+  let type="text",url=null;
+  if(file){
+   if(file.size>25*1024*1024)throw new Error("Ukuran file maksimal 25 MB.");
+   type=voice?"audio":file.type.startsWith("image/")?"image":file.type.startsWith("video/")?"video":null;
+   if(!type)throw new Error("Jenis file tidak didukung.");
+   const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
+   const path=`${activeChatId}/${me.uid}/${Date.now()}_${safe}`;
+   await uploadBytes(ref(storage,"chat-media/"+path),file,{contentType:file.type});
+   url=await getDownloadURL(ref(storage,"chat-media/"+path));
+  }
+  const chatRef=doc(db,"chats",activeChatId);
+  await addDoc(collection(db,"chats",activeChatId,"messages"),{senderId:me.uid,senderName:me.displayName||me.email.split("@")[0],text:text||"",type,url,createdAt:serverTimestamp(),readBy:[me.uid]});
+  await updateDoc(chatRef,{updatedAt:serverTimestamp(),lastMessage:type==="text"?text:`[${type}]`});
+  $("message").value="";$("media").value="";$("voice").value="";$("fileNote").hidden=true;
+ }catch(err){toast("Gagal mengirim: "+err.message);}finally{btn.disabled=false;}
+}
+</script>
+</body>
+</html>
