@@ -214,15 +214,40 @@ $("registerTab").onclick=()=>setMode(true);
 setMode(false);
 
 async function ensureGlobalGroup(user, displayName){
-  const chatRef = doc(db, "chats", GLOBAL_GROUP_ID), snap = await getDoc(chatRef), profile = { uid: user.uid, displayName, email: user.email };
-  if(!snap.exists()){
-    await setDoc(chatRef, { type: "group", name: GLOBAL_GROUP_NAME, members: [user.uid], memberProfiles: [profile], createdBy: user.uid, createdAt: serverTimestamp(), updatedAt: serverTimestamp(), lastMessage: "Grup global dibuat" });
-  } else {
-    const data = snap.data();
-    if(!(data.members||[]).includes(user.uid)){
-      const profiles = (data.memberProfiles||[]).filter(p=>p.uid!==user.uid); profiles.push(profile);
-      await updateDoc(chatRef, { members: arrayUnion(user.uid), memberProfiles: profiles, createdBy: data.createdBy, updatedAt: serverTimestamp() });
+  const chatRef = doc(db, "chats", GLOBAL_GROUP_ID);
+  try {
+    const snap = await getDoc(chatRef);
+    const profile = { uid: user.uid, displayName, email: user.email };
+
+    if(!snap.exists()){
+      await setDoc(chatRef, { 
+        type: "group", 
+        name: GLOBAL_GROUP_NAME, 
+        members: [user.uid], 
+        memberProfiles: [profile], 
+        createdBy: user.uid, 
+        createdAt: serverTimestamp(), 
+        updatedAt: serverTimestamp(), 
+        lastMessage: "Grup global dibuat" 
+      });
+      console.log("Grup global berhasil dibuat!");
+    } else {
+      const data = snap.data();
+      if(!(data.members||[]).includes(user.uid)){
+        const profiles = (data.memberProfiles||[]).filter(p=>p.uid!==user.uid); 
+        profiles.push(profile);
+        await updateDoc(chatRef, { 
+          members: arrayUnion(user.uid), 
+          memberProfiles: profiles, 
+          createdBy: data.createdBy, 
+          updatedAt: serverTimestamp() 
+        });
+        console.log("Berhasil join grup global!");
+      }
     }
+  } catch (error) {
+    console.error("GAGAL BIKIN GRUP (cek Firestore Rules lu!):", error);
+    toast("Gagal bikin grup: " + error.message);
   }
 }
 
@@ -252,7 +277,7 @@ onAuthStateChanged(auth, async user=>{
     $("myEmail").textContent=user.email;
     $("myAvatar").textContent=initials(dn);
     await setDoc(doc(db,"users",user.uid),{uid:user.uid,displayName:dn,email:user.email,lastSeen:serverTimestamp()},{merge:true});
-    try{ await ensureGlobalGroup(user, dn); }catch(e){ console.warn(e); }
+    await ensureGlobalGroup(user, dn); 
     listenData();
     switchTab("chats");
   } else {
@@ -291,14 +316,15 @@ function listenData(){
   if(stopChats)stopChats();
   if(stopContacts)stopContacts();
 
-  // Listener Chats & Groups
   stopChats = onSnapshot(
     query(collection(db,"chats"), where("members","array-contains",me.uid)),
-    snap=>{ chatRows = snap.docs.map(d=>({id:d.id,...d.data()})); if(currentTab==="chats"||currentTab==="groups") renderList(); },
-    err=>toast("Gagal load chat: "+err.message)
+    snap=>{ 
+      chatRows = snap.docs.map(d=>({id:d.id,...d.data()})); 
+      if(currentTab==="chats"||currentTab==="groups") renderList(); 
+    },
+    err=>{ console.error("Gagal load chats:", err); toast("Gagal load chats: "+err.message); }
   );
 
-  // Listener Contacts (Firestore users collection)
   stopContacts = onSnapshot(
     query(collection(db,"users")),
     snap=>{ 
@@ -342,7 +368,12 @@ function renderList(){
 
   let rows = chatRows.filter(c => currentTab === "groups" ? c.type === "group" : c.type !== "group");
   rows = rows.filter(c=>chatName(c).toLowerCase().includes(filter));
-  if(!rows.length){list.innerHTML='<div class="muted tiny" style="padding:16px">Belum ada data.</div>';return;}
+  
+  if(!rows.length){
+    list.innerHTML = `<div class="muted tiny" style="padding:16px">${currentTab === "groups" ? "Grup belum ada. Login ulang atau cek Console." : "Belum ada data."}</div>`;
+    return;
+  }
+  
   for(const c of rows){
     const b=document.createElement("button");b.className="item"+(c.id===activeChatId?" selected":"");
     const av=document.createElement("div");av.className="avatar";av.textContent=initials(chatName(c));
