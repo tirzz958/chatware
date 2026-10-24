@@ -19,9 +19,7 @@ input:focus{outline:none;border-color:var(--bright);box-shadow:0 0 0 3px rgba(0,
 ::-webkit-scrollbar-thumb{background:#2a3942;border-radius:8px}
 ::-webkit-scrollbar-thumb:hover{background:#3b4d57}
 ::-webkit-scrollbar-track{background:transparent}
-
 .app{min-height:100dvh;display:grid;place-items:center;padding:18px;background:radial-gradient(1200px 600px at 50% -10%,#0d3b33 0%,#0b141a 55%)}
-
 .auth{width:min(100%,400px);background:rgba(17,27,33,.85);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid var(--line);padding:30px;border-radius:18px;animation:fadeUp .45s var(--ease)}
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 @keyframes pop{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
@@ -42,7 +40,6 @@ input:focus{outline:none;border-color:var(--bright);box-shadow:0 0 0 3px rgba(0,
 .tab{flex:1;padding:9px;background:transparent;border-radius:8px;font-size:14px;color:var(--muted);transition:all .2s var(--ease)}
 .tab.active{background:var(--bright);color:#052e27;font-weight:650}
 .notice{min-height:18px;color:#ffd180;font-size:13px;margin:8px 0 0}
-
 .shell{width:min(1300px,100%);height:min(900px,calc(100dvh - 36px));min-height:540px;display:grid;grid-template-columns:340px 1fr;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel);box-shadow:0 30px 90px rgba(0,0,0,.55);animation:pop .35s var(--ease)}
 .side{display:flex;flex-direction:column;border-right:1px solid var(--line);min-width:0;background:var(--panel)}
 .top{display:flex;align-items:center;gap:10px;padding:14px;background:rgba(32,44,51,.75);backdrop-filter:blur(10px);min-height:66px}
@@ -65,7 +62,6 @@ input:focus{outline:none;border-color:var(--bright);box-shadow:0 0 0 3px rgba(0,
 .item.selected{background:var(--panel2);box-shadow:inset 3px 0 0 var(--bright)}
 .item .meta{flex:1}
 .last{font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;margin-top:2px}
-
 .chat{position:relative;min-width:0;background:#0b141a;display:flex;flex-direction:column}
 .empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;color:var(--muted);gap:14px}
 .empty .logo{width:82px;height:82px;font-size:38px;box-shadow:0 10px 40px rgba(0,168,132,.3)}
@@ -82,7 +78,6 @@ input:focus{outline:none;border-color:var(--bright);box-shadow:0 0 0 3px rgba(0,
 .msg .sender{font-size:12px;font-weight:700;color:#53bdeb;margin-bottom:3px}
 .time{text-align:right;font-size:10px;color:#c2d1d7;margin-top:4px;display:flex;gap:4px;justify-content:flex-end;align-items:center}
 .time svg{width:14px;height:14px;stroke:#53bdeb;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
-
 .composer{display:flex;align-items:center;gap:6px;padding:10px 12px;background:rgba(32,44,51,.85);backdrop-filter:blur(12px)}
 .composer input[type=text]{margin:0;background:#2a3942;border:0;border-radius:24px;padding:11px 16px}
 .attach{width:42px;height:42px;border-radius:50%;background:#2a3942;display:grid;place-items:center;cursor:pointer;flex:none;transition:background .15s,transform .12s}
@@ -94,10 +89,8 @@ input:focus{outline:none;border-color:var(--bright);box-shadow:0 0 0 3px rgba(0,
 .send:active{transform:scale(.92)}
 .send svg{width:20px;height:20px;fill:#052e27;stroke:none}
 .send:disabled{opacity:.5;cursor:not-allowed}
-
 .toast{position:fixed;display:none;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:#233138;padding:12px 18px;border:1px solid var(--line);border-radius:10px;max-width:90vw;z-index:9;opacity:0;transition:all .25s var(--ease);box-shadow:0 12px 30px rgba(0,0,0,.45)}
 .toast.show{display:block;opacity:1;transform:translateX(-50%) translateY(0)}
-
 @media(max-width:720px){.app{padding:0;background:var(--bg)}.shell{height:100dvh;min-height:0;border:0;border-radius:0;grid-template-columns:1fr}.chat{display:none}.shell.show-chat .side{display:none}.shell.show-chat .chat{display:flex}.auth{border-radius:0;min-height:100dvh;display:flex;flex-direction:column;justify-content:center}.messages{padding:14px 10px}.msg{max-width:90%}}
 </style>
 </head>
@@ -115,7 +108,6 @@ input:focus{outline:none;border-color:var(--bright);box-shadow:0 0 0 3px rgba(0,
   </form>
   <p id="authNote" class="notice" role="status"></p>
 </section>
-
 <section id="shell" class="shell" hidden>
   <aside class="side">
     <header class="top">
@@ -152,13 +144,11 @@ input:focus{outline:none;border-color:var(--bright);box-shadow:0 0 0 3px rgba(0,
 </section>
 </main>
 <div id="toast" class="toast" role="status"></div>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, query, where, orderBy, limit, onSnapshot, serverTimestamp, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
-
 const firebaseConfig = {
   apiKey: "AIzaSyCk6I02APluxxZlYdrGPkof5zOeAWaPY9w",
   authDomain: "chat-25463.firebaseapp.com",
@@ -169,17 +159,14 @@ const firebaseConfig = {
 };
 const GLOBAL_GROUP_ID = "global_apaaja";
 const GLOBAL_GROUP_NAME = "apa aja✌🏻😹";
-
 const configured = !Object.values(firebaseConfig).some(v => v.startsWith("GANTI_"));
 const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app), storage = getStorage(app);
 const $ = id => document.getElementById(id);
 let me=null, isRegister=false, activeChatId=null, activeChatData=null, stopChats=null, stopMessages=null, chatRows=[];
-const escapeHtml = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const initials = s => (s||"U").trim().slice(0,1).toUpperCase();
 const timeText = t => t?.toDate ? t.toDate().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}) : "…";
 function toast(s){$("toast").textContent=s;$("toast").classList.add("show");setTimeout(()=>$("toast").classList.remove("show"),3000);}
 function authNote(s){$("authNote").textContent=s;}
-
 function setMode(reg){
   isRegister=reg;
   $("loginTab").classList.toggle("active",!reg);
@@ -191,8 +178,7 @@ function setMode(reg){
 }
 $("loginTab").onclick=()=>setMode(false);
 $("registerTab").onclick=()=>setMode(true);
-setMode(false); // FIX: inisialisasi mode awal biar isRegister sinkron
-
+setMode(false);
 async function ensureGlobalGroup(user, displayName){
   const chatRef = doc(db, "chats", GLOBAL_GROUP_ID);
   const snap = await getDoc(chatRef);
@@ -223,7 +209,6 @@ async function ensureGlobalGroup(user, displayName){
     }
   }
 }
-
 $("authForm").addEventListener("submit",async e=>{
  e.preventDefault();if(!configured){authNote("Isi firebaseConfig di index.html dulu.");return;}
  $("authSubmit").disabled=true;
@@ -237,7 +222,6 @@ $("authForm").addEventListener("submit",async e=>{
   }else await signInWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);
  }catch(err){authNote(err.message);}finally{$("authSubmit").disabled=false;}
 });
-
 onAuthStateChanged(auth,async user=>{
  if(user){
   me=user;$("auth").hidden=true;$("shell").hidden=false;
@@ -252,10 +236,10 @@ onAuthStateChanged(auth,async user=>{
   if(stopChats)stopChats();if(stopMessages)stopMessages();
   stopChats=null;stopMessages=null;
   activeChatId=null;activeChatData=null;chatRows=[];
-  $("authForm").reset(); // FIX: bersihin form pas logout
+  $("authForm").reset();
+  setMode(false);
  }
 });
-
 $("logout").onclick=()=>signOut(auth);
 $("search").addEventListener("input",renderChats);
 $("newChat").onclick=startDirect;
@@ -264,7 +248,6 @@ $("back").onclick=()=>{$("shell").classList.remove("show-chat");};
 $("media").onchange=()=>{$("fileNote").hidden=!$("media").files[0];$("fileNote").textContent=$("media").files[0]?.name||"";};
 $("voice").onchange=()=>{$("fileNote").hidden=!$("voice").files[0];$("fileNote").textContent=$("voice").files[0]?"Voice note: "+$("voice").files[0].name:"";};
 $("composer").addEventListener("submit",sendMessage);
-
 function listenChats(){
  if(stopChats)stopChats();
  stopChats=onSnapshot(query(collection(db,"chats"),where("members","array-contains",me.uid),orderBy("updatedAt","desc")),snap=>{
